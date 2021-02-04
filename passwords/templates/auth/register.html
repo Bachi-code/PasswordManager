@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+{% block content %}
+    <h2>Register</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <input class="btn btn-primary" type="submit" value="Register">
+    </form>
+
+    <a href="{% url 'home' %}">Back to home page</a>
+
+{% endblock %}

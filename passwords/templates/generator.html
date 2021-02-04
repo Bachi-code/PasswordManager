@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+{% block javascript %}
+    <script>
+        $('#generateform').on('submit', function(e) {
+            e.preventDefault();
+            var uppercase = false;
+            var numbers = false;
+            var symbols = false;
+            var lowercase = false;
+            var forceall = false;
+
+            if ($('input[name="uppercase"]').is(':checked')) {
+                uppercase = true;
+            }
+            if ($('input[name="numbers"]').is(':checked')) {
+                numbers = true;
+            }
+            if ($('input[name="symbols"]').is(':checked')) {
+                symbols = true;
+            }
+            if ($('input[name="lowercase"]').is(':checked')) {
+                lowercase = true;
+            }
+            if ($('input[name="forceall"]').is(':checked')) {
+                forceall = true;
+            }
+
+            $.ajax({
+                type: "GET",
+                url: "{% url 'generator' %}",
+                data: {
+                    length: $('#length').val(),
+                    uppercase: uppercase,
+                    numbers: numbers,
+                    symbols: symbols,
+                    lowercase: lowercase,
+                    forceall: forceall,
+                    dataType: "json"
+                },
+                success: function(data){
+                    $('#showpass').html("Your password is: " + data.the_pass)
+                    },
+                error: function(){
+                    if(forceall === true){
+                        $('#showpass').html("You need to choose at least one option with force all!")
+                    }
+                    else {
+                        $('#showpass').html("You need to choose at least one option!")
+                    }
+                    },
+                });
+
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <h1>Password Generator</h1>
+    <form method="GET" id="generateform">
+        <select id="length" name="length">
+            {% for value in range %}
+                <option value="{{ value }}">{{ value }}</option>
+            {% endfor %}
+        </select> Password Length
+        <br><br>
+        <input id="uppercase" type="checkbox" name="uppercase">Uppercase</input>
+        <br>
+        <input id="numbers" type="checkbox" name="numbers">Numbers</input>
+        <br>
+        <input id="symbols" type="checkbox" name="symbols">Symbols</input>
+        <br>
+        <input id="lowercase" type="checkbox" name="lowercase">Lowercase</input>
+        <br>
+        <input id="forceall" type="checkbox" name="forceall">Force selections of chars</input>
+        <br>
+        <hr>
+        <input class="btn btn-primary" type="submit" value="Generate">
+    </form>
+    <br>
+    <div id="showpass"></div>
+    <br>
+    <a class="btn btn-primary" href="{% url 'home' %}">BACK</a>
+{% endblock %}
