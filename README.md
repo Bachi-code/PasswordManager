@@ -12,6 +12,7 @@ Project is created with:
 * django-cryptography: 1.0
 * pwned-passwords-django: 1.4.1
 * cryptography: 3.1.1
+* Bootstrap: 4
 
 ## Settings.py
 ```
