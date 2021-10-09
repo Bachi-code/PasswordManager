@@ -3,10 +3,10 @@ from django.contrib.auth import views as auth_views
 from passwords import views
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.HomeView.as_view(), name='home'),
     path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='auth/logged_out.html'), name='logout'),
-    path('register/', views.register, name='register'),
+    path('register/', views.RegisterView.as_view(), name='register'),
     path('password_change/',
          auth_views.PasswordChangeView.as_view(template_name='auth/password_change_form.html'),
          name='password_change'),
@@ -25,8 +25,8 @@ urlpatterns = [
     path('reset/done/',
          auth_views.PasswordResetCompleteView.as_view(template_name='auth/password_reset_complete.html'),
          name='password_reset_complete'),
-    path('list/', views.password_list, name='password_list'),
-    path('create/', views.password_create, name='password_create'),
-    path('delete/<int:pk>/', views.password_delete, name='password_delete'),
+    path('list/', views.PasswordListView.as_view(), name='password_list'),
+    path('create/', views.PasswordCreateView.as_view(), name='password_create'),
+    path('delete/<int:pk>/', views.PasswordDeleteView.as_view(), name='password_delete'),
     path('generator/', views.generator, name='generator'),
 ]

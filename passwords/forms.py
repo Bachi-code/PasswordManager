@@ -31,7 +31,8 @@ class PasswordCreate(forms.ModelForm):
         fields = ('site_url', 'password', 'login',)
 
         widgets = {
-            "password": forms.PasswordInput(attrs={'placeholder': '********', 'autocomplete': 'new-password', 'data-toggle': 'password'}),
+            "password": forms.PasswordInput(attrs={'placeholder': '********', 'autocomplete': 'new-password',
+                                                   'data-toggle': 'password'}),
             "site_url": forms.URLInput(attrs={'autocomplete': 'new-password'}),
         }
 

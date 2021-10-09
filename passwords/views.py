@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
+from django.http import JsonResponse, Http404
+from django.urls import reverse_lazy
+from django.views.generic import TemplateView, CreateView, ListView, View, DeleteView
 from passwords.forms import CustomUserCreationForm, PasswordCreate
 from passwords.models import PasswordEntry
 from pwned_passwords_django.api import pwned_password
@@ -9,44 +11,40 @@ import string
 import secrets
 
 
-def home(request):
-    return render(request, 'home.html')
+class HomeView(TemplateView):
+    template_name = "home.html"
 
 
-def register(request):
-    if request.method == "POST":
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            user.save()
-            messages.success(request, "Account created successfully.")
-            return redirect('home')
-    else:
-        form = CustomUserCreationForm()
-    return render(request, "auth/register.html", {"form": form})
+class RegisterView(SuccessMessageMixin, CreateView):
+    template_name = "auth/register.html"
+    success_url = reverse_lazy("home")
+    form_class = CustomUserCreationForm
+    success_message = "Account created successfully."
 
 
-@login_required
-def password_create(request):
-    if request.method == "POST":
-        form = PasswordCreate(request.POST, user=request.user)
-        if form.is_valid():
-            entry = form.save(commit=False)
-            entry.owner_password = request.user
-            entry.save()
-            messages.success(request, "Password saved successfully.")
-            return redirect('home')
-    else:
-        form = PasswordCreate()
-    return render(request, "password/password_create.html", {"form": form})
+class PasswordCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+    template_name = "password/password_create.html"
+    success_url = reverse_lazy("password_list")
+    form_class = PasswordCreate
+    success_message = "Password saved successfully."
+
+    def form_valid(self, form):
+        form.instance.owner_password = self.request.user
+        return super().form_valid(form)
 
 
-@login_required
-def password_list(request):
-    if request.method == 'POST' and request.is_ajax():
-        user = request.user
-        pk = request.POST.get('password_id')
-        check = request.POST.get('check_p')
+class PasswordListView(LoginRequiredMixin, TemplateView):
+    template_name = "password/password_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(PasswordListView, self).get_context_data(**kwargs)
+        context["passwords"] = PasswordEntry.objects.all()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
+        pk = self.request.POST.get('password_id')
+        check = self.request.POST.get('check_p')
         password = PasswordEntry.objects.get(pk=pk, owner_password=user)
         test = password.decrypt_password()
         if check == "True":
@@ -57,20 +55,19 @@ def password_list(request):
                 return JsonResponse({'password': count})
         else:
             return JsonResponse({'password': test})
-    user = request.user
-    passwords = PasswordEntry.objects.filter(owner_password=user)
-    return render(request, "password/password_list.html", {"passwords": passwords})
 
 
-@login_required
-def password_delete(request, pk):
-    user = request.user
-    password = get_object_or_404(PasswordEntry, id=pk, owner_password=user)
-    if request.method == 'POST':
-        password.delete()
-        messages.success(request, "Password deleted successfully.")
-        return redirect('password_list')
-    return render(request, "password/password_delete.html", {"password": password})
+class PasswordDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
+    template_name = "password/password_delete.html"
+    model = PasswordEntry
+    success_url = reverse_lazy("password_list")
+    success_message = "Password deleted successfully."
+
+    def get_object(self, queryset=None):
+        obj = super(PasswordDeleteView, self).get_object()
+        if not obj.owner_password == self.request.user:
+            raise Http404
+        return obj
 
 
 def generator(request):
