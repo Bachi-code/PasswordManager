@@ -15,8 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from two_factor.urls import urlpatterns as tf_urls
+from two_factor.gateways.twilio.urls import urlpatterns as tf_twilio_urls
 
 urlpatterns = [
     path('', include('passwords.urls')),
+    path('', include(tf_urls)),
+    path('', include(tf_twilio_urls)),
     path('admin/', admin.site.urls),
 ]

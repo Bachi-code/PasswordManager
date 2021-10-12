@@ -1,0 +1,5 @@
+{% load crispy_forms_filters %}
+{% block content %}
+  {{ wizard.management_form|crispy }}
+  {{ wizard.form|crispy }}
+{% endblock %}

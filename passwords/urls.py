@@ -4,7 +4,6 @@ from passwords import views
 
 urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
-    path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='auth/logged_out.html'), name='logout'),
     path('register/', views.RegisterView.as_view(), name='register'),
     path('password_change/',

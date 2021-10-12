@@ -2,7 +2,8 @@
 {% block content %}
     <div class="container">
         <h2>Welcome to the password manager</h2>
-    <p>To check your passwords click to <a href="{% url 'login' %}">login</a> first or click <a href="#">register</a>
+    <p>To check your passwords click to <a href="{% url 'two_factor:login' %}">login</a> first or click
+        <a href="{% url 'register' %}">register</a>
         if you don't have an account</p>
     </div>
 {% endblock %}
