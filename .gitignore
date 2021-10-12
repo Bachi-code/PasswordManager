@@ -1,4 +1,3 @@
-PasswordManager/settings.py
 /db.sqlite3
 /.idea
 /PasswordManager/settings_local.py
